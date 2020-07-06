@@ -1,0 +1,159 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Bulk Load {{ vm.getUserFacingBulkLoadType() }}</h3>
+    </div>
+    <div class="panel-body">
+        <div class="panel panel-info" data-ng-if="vm.isInstructionsShown" data-bulk-load-info>
+            <div class="panel-heading">
+                <h4 class="panel-title">Instructions</h4>
+            </div>
+            <div class="panel-body">
+                <p>Welcome to the {{ vm.getUserFacingBulkLoadType() }} bulk load utility!</p>
+
+                <bulk-load-instructions-purchase-items
+                    ng-if='vm.isBulkLoadTypePurchaseItems()'>
+                </bulk-load-instructions-purchase-items>
+
+                <bulk-load-instructions-beginning-costs
+                    ng-if='vm.isBulkLoadTypeBeginningCosts()'>
+                </bulk-load-instructions-beginning-costs>
+
+                <bulk-load-instructions-housemade-items
+                    ng-if='vm.isBulkLoadTypeHousemadeItems()'>
+                </bulk-load-instructions-housemade-items>
+
+                <a data-ng-click="vm.hideInstructions()">
+                    Hide these instructions
+                </a>
+            </div>
+        </div>
+
+        <form class="form-inline">
+            <div class="form-group">
+                <label>
+                    <input type="checkbox"
+                           ng-model="vm.verifyOnly"
+                           name="verifyOnly"
+                           id="verifyOnly">
+                    Check to only verify the spreadsheet's validity
+                </label>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-6">
+                    <div class="btn btn-default"
+                         ngf-select="vm.onSelectUploadFile($file)"
+                         ngf-accept="'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/csv'"
+                         ng-model="vm.file">Choose file to upload ...
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <a data-ng-click="vm.showInstructions()" data-ng-if="!vm.isInstructionsShown">Show instructions</a>
+            </div>
+        </form>
+
+        <span us-spinner="{radius:30, width:8, length: 16}" spinner-on="vm.uploadStarted && !vm.uploadComplete"></span>
+
+        <div ng-if="vm.uploadComplete">
+
+            <div class="panel panel-warning"
+                 data-ng-if="vm.validationErrors.length > 0">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Validation Errors</h4>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-1 col-xs-1">
+                            <strong>Row</strong>
+                        </div>
+                        <div class="col-sm-1 col-xs-1">
+                            <strong>Column</strong>
+                        </div>
+                        <div class="col-sm-10 col-xs-10">
+                            <strong>Description</strong>
+                        </div>
+                    </div>
+                    <div class="row"
+                         ng-repeat="error in vm.validationErrors | orderBy: ['row_index', 'column_index']">
+                        <div class="col-sm-1 col-xs-1">{{error.spreadsheet_row}}</div>
+                        <div class="col-sm-1 col-xs-1">{{error.spreadsheet_column}}</div>
+                        <div class="col-sm-10 col-xs-10">{{error.description}}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-success"
+                 data-ng-if="vm.validationErrors.length == 0 && !vm.processingError && !vm.fileContentsLoadedToDatabase">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Validation Errors</h4>
+                </div>
+                <div class="panel-body">
+                    <div class='row'>
+                        <div class='col-sm-12 col-xs-12'>
+                            The file contains no validation errors!
+                        </div>
+                    </div>
+
+                    <div class='row'>
+                        <div class='col-sm-12 col-xs-12'>
+                            <br>
+                            <button class='btn btn-success'
+                                    ng-click='vm.loadItemsFromCurrentFile()'>
+                                Load Items From File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-danger"
+                 data-ng-if="vm.processingError">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Processsing Errors</h4>
+                </div>
+                <div class="panel-body">
+                    <div class='row'>
+                        <div class='col-sm-12 col-xs-12'>
+                            The system encountered a problem when processing your file.
+                        </div>
+                    </div>
+
+                    <div class='row'>
+                        <div class='col-sm-12 col-xs-12'>
+                            <br>
+                            <button class='btn btn-danger'
+                                    ng-click='vm.retryUploadFile()'>
+                                Retry
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-success"
+                 data-ng-if="vm.fileContentsLoadedToDatabase">
+                <div class="panel-heading">
+                    <h4 class="panel-title">Upload results</h4>
+                </div>
+                <div class="panel-body">
+                    <table class="table">
+                        <tbody>
+                        <tr>
+                            <td>Number of items in uploaded file</td>
+                            <td class="text-right">{{vm.itemsCount}}</td>
+                        </tr>
+                        <tr>
+                            <td>Number of items added to the system</td>
+                            <td class="text-right">{{vm.itemsLoadedCount}}</td>
+                        </tr>
+                        <tr>
+                            <td>Number of items skipped</td>
+                            <td class="text-right">{{vm.itemsSkippedCount}}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
